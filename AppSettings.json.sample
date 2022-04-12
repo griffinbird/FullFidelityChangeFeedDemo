@@ -1,7 +1,0 @@
-{
-  "databaseId": "db-1",
-  "containerId": "container",
-  "partitionKeyPath": "/BuyerState",
-"connectionString": ""
-  
-}
