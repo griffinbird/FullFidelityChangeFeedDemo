@@ -3,8 +3,8 @@ Demo showing the contrast between the incremental change feed and full fidelity 
 
 ## Running the demo
 dotnet run
-Press any key to create sample data
-Press any key again to start deletng data
-Press any key again to start the incremental change feed reading the changes
+1. Press any key to create sample data
+2. Press any key again to start deletng data
+3. Press any key again to start the incremental change feed reading the changes
 (You don't have to let it finish)
-Press any key again to start the full fidelity change feed
+4. Press any key again to start the full fidelity change feed
