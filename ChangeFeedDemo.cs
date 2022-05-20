@@ -10,10 +10,10 @@ using System.Threading;
 
 namespace FullFidelityChangeFeedDemo
 {
-    class ChangeFeedDemo
+    class ChangeFeedDemo : IDisposable
     {
-        private static string connectionString;
-        private static CosmosClient cosmosClient;
+        private string connectionString;
+        private CosmosClient cosmosClient;
         public Container container;
         private int addItemCounter;
         private int deleteItemCounter;
@@ -38,6 +38,10 @@ namespace FullFidelityChangeFeedDemo
             readIncrementalContinuationToken = null;
         }
 
+    public void Dispose()
+    {
+        cosmosClient?.Dispose();
+    }
     public async Task CreateContainerWithFullFidelity()
         {
             await Console.Out.WriteLineAsync("Creating a container with full fidelity change feed enabled");
@@ -53,55 +57,49 @@ namespace FullFidelityChangeFeedDemo
 
     public async Task CreateFullFidelityChangeFeedIterator()
         {
+            Console.WriteLine("Starting CreateFullFidelityChangeFeedIterator");
             fullFidelityContinuationToken = null;
             FeedIterator<ItemWithMetadata> fullfidelityIterator = container
                 .GetChangeFeedIterator<ItemWithMetadata>(ChangeFeedStartFrom.Now(), ChangeFeedMode.FullFidelity);
-                while (fullfidelityIterator.HasMoreResults)
+               while (fullfidelityIterator.HasMoreResults)
                 {
-                    try
+                    FeedResponse<ItemWithMetadata> items = await fullfidelityIterator.ReadNextAsync();
+                    if (items.StatusCode == HttpStatusCode.NotModified)
                     {
-                        FeedResponse<ItemWithMetadata> items = await fullfidelityIterator.ReadNextAsync();
-                    }
-                    catch (CosmosException cosmosException) when (cosmosException.StatusCode == HttpStatusCode.NotModified)
-                    {
-                        fullFidelityContinuationToken = cosmosException.Headers.ContinuationToken;
                         Console.WriteLine("Created ChangeFeedIterator to read Full Fidelity change feed");
+                        fullFidelityContinuationToken = items.Headers.ContinuationToken;
                         break;
-                    }
-                }
-   
+                    }   
+                }   
         }
 
         public async Task CreateIncrementalChangeFeedIterator()
         {
-            
+            Console.WriteLine("Starting CreateIncrementalChangeFeedIterator");
             readIncrementalContinuationToken = null;
             FeedIterator<Item> incrementalIterator = container.GetChangeFeedIterator<Item>(ChangeFeedStartFrom.Now(), ChangeFeedMode.Incremental);
 
                 while (incrementalIterator.HasMoreResults)
                 {
-                    try
+                    FeedResponse<Item> items = await incrementalIterator.ReadNextAsync();
+                    if (items.StatusCode == HttpStatusCode.NotModified)
                     {
-                        FeedResponse<Item> items = await incrementalIterator.ReadNextAsync();
-                    }
-                    catch (CosmosException cosmosException) when (cosmosException.StatusCode == HttpStatusCode.NotModified)
-                    {
-                        readIncrementalContinuationToken = cosmosException.Headers.ContinuationToken;
                         Console.WriteLine("Created ChangeFeedIterator to read incremental change feed");
+                        readIncrementalContinuationToken = items.Headers.ContinuationToken;
                         break;
-                    }
+                    } 
                 }
         }
 
         public async Task IngestData()
         {
-            Console.Clear();
+            //Console.Clear();
            
-            await Console.Out.WriteLineAsync("Press any key to begin ingesting data.");
+            Console.WriteLine("Press any key to begin ingesting data.");
 
             Console.ReadKey(true);
 
-            await Console.Out.WriteLineAsync("Press any key to stop.");
+            Console.WriteLine("Press any key to stop.");
 
             var tasks = new List<Task>();
 

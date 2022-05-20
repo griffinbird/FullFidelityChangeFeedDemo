@@ -10,7 +10,8 @@ namespace FullFidelityChangeFeedDemo
     {
         public static async Task Main(string[] args)
         {
-            ChangeFeedDemo changeFeedDemo = new ChangeFeedDemo();
+            Console.WriteLine(DateTime.UtcNow.ToString("r", System.Globalization.CultureInfo.InvariantCulture));
+            using ChangeFeedDemo changeFeedDemo = new ChangeFeedDemo();
             await changeFeedDemo.CreateContainerWithFullFidelity();
             await changeFeedDemo.CreateFullFidelityChangeFeedIterator();
             await changeFeedDemo.CreateIncrementalChangeFeedIterator();
